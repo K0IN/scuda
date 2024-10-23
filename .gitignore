@@ -1,8 +1,2 @@
 libscuda.so
-a.out
-venv/
-
-*.o
-*.so
-gdb.txt
-server
+scuda-server

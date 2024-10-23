@@ -3,7 +3,7 @@ VERSION 0.8
 FROM ubuntu:24.10
 WORKDIR /app
 
-all:
+all: # earthly +all
     BUILD +build-server
     BUILD +build-client
     BUILD +build-server-docker
@@ -16,13 +16,13 @@ cuda:
 build-server:
     ARG NVCCFLAGS="-O3 -dlto -lnvidia-ml -lcuda"
     FROM +cuda
-    COPY server.cu .
+    COPY server/server.cu .
     COPY codegen codegen
     RUN nvcc -o server $NVCCFLAGS server.cu codegen/gen_server.cpp codegen/manual_server.cpp 
-    SAVE ARTIFACT server AS LOCAL server
+    SAVE ARTIFACT server AS LOCAL scuda-server
 
 
-build-server-docker:  # docker run --gpus all -it -p 14833:14833 scuda:latest
+build-server-docker: # docker run --gpus all -it -p 14833:14833 scuda:latest
     FROM +cuda
     COPY +build-server/server /app/server
     ENV SCUDA_PORT=14833
@@ -36,7 +36,7 @@ build-client:
     ARG CXXFLAGS="-fPIC -O3 -Wall -Wextra -DNDEBUG -std=c++17 -flto=auto -ffast-math -march=native -mtune=native -pipe -fomit-frame-pointer" # -Ofast
     ARG linkflags="-Wl,-O3 -Wl,--as-needed -Wl,--gc-sections -fuse-ld=gold"
     FROM +cuda
-    COPY client.cpp .
+    COPY client/client.cpp .
     COPY codegen codegen
     RUN $CXX $CXXFLAGS -c client.cpp -o client.o -I/usr/local/cuda/include
     RUN $CXX $CXXFLAGS -c codegen/gen_client.cpp -o gen_client.o -I/usr/local/cuda/include
