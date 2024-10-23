@@ -27,8 +27,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/server
-            build/client
+            libscuda.so
+            scuda-server
           tag_name: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
