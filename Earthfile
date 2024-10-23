@@ -57,4 +57,4 @@ build-client:
 #     END
 
 
-# CUDA_SERVER=127.0.0.1 LD_PRELOAD="/mnt/e/src/scuda/libscuda.so" python3 -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
+# SCUDA_SERVER=127.0.0.1 LD_PRELOAD="/mnt/e/src/scuda/libscuda.so" python3 -c "import torch; print('CUDA Available:', torch.cuda.is_available())"
