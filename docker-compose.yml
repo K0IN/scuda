@@ -1,8 +1,12 @@
 services:
   server:
     image: scuda:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 14833:14833
+
     deploy:
       resources:
         reservations:
