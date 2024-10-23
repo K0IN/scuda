@@ -49,7 +49,7 @@ build-client:
     RUN $CXX $CXXFLAGS -c codegen/gen_client.cpp -o gen_client.o -I/usr/local/cuda/include
     RUN $CXX $CXXFLAGS -c codegen/manual_client.cpp -o manual_client.o -I/usr/local/cuda/include
     RUN $CXX $linkflags -shared -o libscuda.so client.o gen_client.o manual_client.o -L/usr/local/cuda/lib64 -lcudart -lstdc++
-    SAVE ARTIFACT libscuda.so AS LOCAL libscuda.so
+    SAVE ARTIFACT libscuda.so AS LOCAL $ARTIFACT_NAME
 
 # This does not work for me, seems to be related to https://github.com/earthly/earthly/issues/830
 # Error response from daemon: could not select device driver "nvidia" with capabilities: [[gpu]]
