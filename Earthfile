@@ -6,20 +6,26 @@ WORKDIR /app
 all: # earthly +all
     BUILD +build-server
     BUILD +build-client
-    BUILD +build-server-docker
+    # BUILD +build-server-docker
 
+cross:
+    BUILD --platform=linux/amd64 +build-server --ARTIFACT_NAME=scuda-server
+    BUILD --platform=linux/arm64 +build-server --ARTIFACT_NAME=scuda-server-arm64
+    BUILD --platform=linux/amd64 +build-client --ARTIFACT_NAME=libscuda.so
+    BUILD --platform=linux/arm64 +build-client --ARTIFACT_NAME=libscuda-arm64.so
 
 cuda:
     FROM nvidia/cuda:12.6.2-devel-ubuntu24.04
 
 
 build-server:
+    ARG ARTIFACT_NAME="scuda-server"
     ARG NVCCFLAGS="-O3 -dlto -lnvidia-ml -lcuda"
     FROM +cuda
     COPY server/server.cu .
     COPY codegen codegen
     RUN nvcc -o server $NVCCFLAGS server.cu codegen/gen_server.cpp codegen/manual_server.cpp 
-    SAVE ARTIFACT server AS LOCAL scuda-server
+    SAVE ARTIFACT server AS LOCAL $ARTIFACT_NAME
 
 
 build-server-docker: # docker run --gpus all -it -p 14833:14833 scuda:latest
@@ -32,6 +38,7 @@ build-server-docker: # docker run --gpus all -it -p 14833:14833 scuda:latest
 
 
 build-client:
+    ARG ARTIFACT_NAME="libscuda.so"
     ARG CXX=g++
     ARG CXXFLAGS="-fPIC -O3 -Wall -Wextra -DNDEBUG -std=c++17 -flto=auto -ffast-math -march=native -mtune=native -pipe -fomit-frame-pointer" # -Ofast
     ARG linkflags="-Wl,-O3 -Wl,--as-needed -Wl,--gc-sections -fuse-ld=gold"
