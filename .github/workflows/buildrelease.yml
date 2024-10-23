@@ -7,15 +7,40 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+
 jobs:
-  tests:
-    name: example earthly test
+  build-binaries:
+    name: Build binaries
     runs-on: ubuntu-latest
     steps:
       - uses: earthly/actions-setup@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: "latest" # or pin to an specific version, e.g. "0.8.1"
+          version: "latest"
+      
       - uses: actions/checkout@v2
+      
       - name: Build Server/Client binaries
         run: earthly +all
+      
+      - name: Create Release
+#       if: startsWith(github.ref, 'refs/tags/v')
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+  
+      - name: Upload Release Assets
+#       if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            libscuda.so
+            scuda-server
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
