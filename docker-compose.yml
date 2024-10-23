@@ -1,6 +1,6 @@
 services:
   server:
-    image: scuda:latest
+    image: ghcr.io/k0in/scuda:latest
     build:
       context: .
       dockerfile: Dockerfile
