@@ -1,0 +1,12 @@
+services:
+  server:
+    image: scuda:latest
+    ports:
+      - 14833:14833
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]

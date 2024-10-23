@@ -5,3 +5,4 @@ venv/
 *.o
 *.so
 gdb.txt
+server
