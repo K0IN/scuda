@@ -44,7 +44,7 @@ The server port can be changed using the environment variable `SCUDA_PORT`.
 On the client machine, set the `SCUDA_SERVER` environment variable to the server's IP and set the `SCUDA_PORT` if modified, and preload the SCUDA library:
 
 ```sh
-export SCUDA_HOST=<ip>
+export SCUDA_SERVER=<ip>
 # export SCUDA_PORT=<port>
 LD_PRELOAD="libscuda.so" nvidia-smi
 ```
