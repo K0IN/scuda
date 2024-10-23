@@ -16,19 +16,37 @@ jobs:
       - uses: earthly/actions-setup@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: "latest"
+          version: "latest"      
       
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
+      - name: Set up QEMU      
+        uses: docker/setup-qemu-action@v2
+
       - name: Build Server/Client binaries
-        run: earthly +all
+        run: earthly --platform=linux/amd64 +all
+
+      - name: rename files to arch (amd)
+        run: |
+          mv libscuda.so libscuda-amd.so
+          mv scuda-server scuda-server-amd
       
+      - name: Build Server/Client binaries (arm)
+        run: earthly --platform=linux/arm64 +all
+
+      - name: rename files to arch (arm)
+        run: |
+          mv libscuda.so libscuda-arm64.so
+          mv scuda-server scuda-server-arm64
+
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            libscuda.so
-            scuda-server
+            libscuda-amd.so
+            scuda-server-amd
+            libscuda-arm64.so
+            scuda-server-arm64
           tag_name: ${{ github.event.release.tag_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
