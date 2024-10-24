@@ -23,7 +23,7 @@ if you want to cross compile (supported: linux/arm64 and linux/amd64) the binari
 
 If you want to build it using plain docker you can also build the provided docker file.
 
-> docker build . -t scuda:local
+> docker build --build-arg BASE_IMAGE=nvidia/cuda:12.6.2-devel-ubuntu24.04 . -t scuda:local
 
 ## Usage
 
@@ -33,7 +33,7 @@ To use SCUDA, ensure the server is running on a machine with a GPU:
 scuda-server
 ```
 
-or using docker 
+or using docker
 
 ```sh
 docker run --gpus all -p 14833:14833 ghcr.io/k0in/scuda:latest

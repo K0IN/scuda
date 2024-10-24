@@ -16,11 +16,11 @@ jobs:
       - uses: earthly/actions-setup@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: "latest"      
-      
+          version: "latest"
+
       - uses: actions/checkout@v3
-      
-      - name: Set up QEMU      
+
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
       - name: Build Server/Client binaries

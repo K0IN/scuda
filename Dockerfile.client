@@ -1,0 +1,17 @@
+FROM nvidia/cuda:12.6.2-devel-ubuntu24.04 AS builder
+WORKDIR /build
+COPY client/client.cpp .
+COPY codegen codegen
+RUN g++ -fPIC -O3 -Wall -Wextra -DNDEBUG -std=c++17 -flto=auto -ffast-math -march=native -mtune=native -pipe -fomit-frame-pointer -c client.cpp -o client.o -I/usr/local/cuda/include
+RUN g++ -fPIC -O3 -Wall -Wextra -DNDEBUG -std=c++17 -flto=auto -ffast-math -march=native -mtune=native -pipe -fomit-frame-pointer -c codegen/gen_client.cpp -o gen_client.o -I/usr/local/cuda/include
+RUN g++ -fPIC -O3 -Wall -Wextra -DNDEBUG -std=c++17 -flto=auto -ffast-math -march=native -mtune=native -pipe -fomit-frame-pointer -c codegen/manual_client.cpp -o manual_client.o -I/usr/local/cuda/include
+RUN g++ -Wl,-O3 -Wl,--as-needed -Wl,--gc-sections -fuse-ld=gold -shared -o libscuda.so client.o gen_client.o manual_client.o -L/usr/local/cuda/lib64 -lcudart -lstdc++
+
+FROM nvidia/cuda:12.6.2-devel-ubuntu24.04
+ENV SCUDA_SERVER=host.docker.internal
+ENV SCUDA_PORT=14833
+WORKDIR /cuda
+COPY --from=builder /build/libscuda.so .
+ENV LD_PRELOAD=/cuda/libscuda.so
+WORKDIR /
+ENTRYPOINT [ "nvidia-smi" ]

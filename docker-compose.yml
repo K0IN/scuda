@@ -1,12 +1,13 @@
 services:
   server:
-    image: ghcr.io/k0in/scuda:latest
+    #image: ghcr.io/k0in/scuda:latest
     build:
       context: .
       dockerfile: Dockerfile
+
     ports:
       - 14833:14833
-
+    restart: always
     deploy:
       resources:
         reservations:

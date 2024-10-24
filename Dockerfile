@@ -1,13 +1,15 @@
-FROM nvidia/cuda:12.6.2-devel-ubuntu24.04 AS builder
+ARG BASE_IMAGE=nvidia/cuda:12.6.2-devel-ubuntu24.04
+
+FROM ${BASE_IMAGE} AS builder
 ENV SCUDA_PORT=14833
 WORKDIR /build
 COPY server/server.cu .
 COPY codegen codegen
-RUN nvcc -o server -O3 -dlto -lnvidia-ml -lcuda server.cu codegen/gen_server.cpp codegen/manual_server.cpp
+RUN nvcc -o server -lnvidia-ml -lcuda server.cu codegen/gen_server.cpp codegen/manual_server.cpp
 
-FROM nvidia/cuda:12.6.2-runtime-ubuntu24.04
+FROM ${BASE_IMAGE}
 ENV SCUDA_PORT=14833
 WORKDIR /app
 COPY --from=builder /build/server /app/
 EXPOSE $SCUDA_PORT
-ENTRYPOINT ["/app/server"]
+CMD ["/app/server"]
