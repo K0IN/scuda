@@ -5,7 +5,7 @@ ENV SCUDA_PORT=14833
 WORKDIR /build
 COPY server/server.cu .
 COPY codegen codegen
-RUN nvcc -o server -lnvidia-ml -lcuda server.cu codegen/gen_server.cpp codegen/manual_server.cpp
+RUN nvcc -o server -DVERBOSE=1 -lnvidia-ml -lcuda server.cu codegen/gen_server.cpp codegen/manual_server.cpp
 
 FROM ${BASE_IMAGE}
 ENV SCUDA_PORT=14833
