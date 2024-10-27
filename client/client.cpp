@@ -45,12 +45,22 @@ const char *DEFAULT_PORT = "14833";
 int rpc_open()
 {
   if (pthread_mutex_lock(&conn_mutex) < 0)
+  {
+#ifdef VERBOSE
+    printf("rpc_open failed pthread_mutex_lock(&conn_mutex) failed\n");
+#endif
     return -1;
+  }
 
   if (nconns > 0)
   {
     if (pthread_mutex_unlock(&conn_mutex) < 0)
+    {
+#ifdef VERBOSE
+      printf("rpc_open failed pthread_mutex_unlock(&conn_mutex) failed\n");
+#endif
       return -1;
+    }
     return 0;
   }
 
@@ -87,21 +97,41 @@ int rpc_open()
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     if (getaddrinfo(server_ip, port, &hints, &res) != 0)
+    {
+#ifdef VERBOSE
+      printf("rpc_open failed getaddrinfo failed\n");
+#endif
       return -1;
+    }
 
     int flag = 1;
     int sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (sockfd == -1 ||
         setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int)) < 0 ||
         connect(sockfd, res->ai_addr, res->ai_addrlen) < 0)
+    {
+#ifdef VERBOSE
+      printf("rpc_open failed socket failed\n");
+#endif
       return -1;
+    }
 
     conns[nconns++] = {sockfd, 0, 0, 0, 0, PTHREAD_MUTEX_INITIALIZER, PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER};
   }
   if (pthread_mutex_unlock(&conn_mutex) < 0)
+  {
+#ifdef VERBOSE
+    printf("rpc_open last pthread_mutex_unlock(&conn_mutex) < 0\n");
+#endif
     return -1;
+  }
   if (nconns == 0)
+  {
+#ifdef VERBOSE
+    printf("rpc_open nconns == 0\n");
+#endif
     return -1;
+  }
   return 0;
 }
 
