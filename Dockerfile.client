@@ -14,4 +14,4 @@ WORKDIR /cuda
 COPY --from=builder /build/libscuda.so .
 ENV LD_PRELOAD=/cuda/libscuda.so
 WORKDIR /
-ENTRYPOINT [ "nvidia-smi" ]
+CMD [ "nvidia-smi" ]

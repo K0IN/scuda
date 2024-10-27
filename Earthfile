@@ -24,17 +24,17 @@ build-server:
     FROM +cuda
     COPY server/server.cu .
     COPY codegen codegen
-    RUN nvcc -o server $NVCCFLAGS server.cu codegen/gen_server.cpp codegen/manual_server.cpp 
+    RUN nvcc -o server -DVERBOSE=1 $NVCCFLAGS server.cu codegen/gen_server.cpp codegen/manual_server.cpp 
     SAVE ARTIFACT server AS LOCAL $ARTIFACT_NAME
 
 
-build-server-docker: # docker run --gpus all -it -p 14833:14833 scuda:latest
-    FROM +cuda
-    COPY +build-server/server /app/server
-    ENV SCUDA_PORT=14833
-    EXPOSE $SCUDA_PORT
-    ENTRYPOINT ["/app/server"]
-    SAVE IMAGE scuda:latest
+# build-server-docker: # docker run --gpus all -it -p 14833:14833 scuda:latest
+#     FROM +cuda
+#     COPY +build-server/server /app/server
+#     ENV SCUDA_PORT=14833
+#     EXPOSE $SCUDA_PORT
+#     ENTRYPOINT ["/app/server"]
+#     SAVE IMAGE scuda:latest
 
 
 build-client:
@@ -45,9 +45,9 @@ build-client:
     FROM +cuda
     COPY client/client.cpp .
     COPY codegen codegen
-    RUN $CXX $CXXFLAGS -c client.cpp -o client.o -I/usr/local/cuda/include
-    RUN $CXX $CXXFLAGS -c codegen/gen_client.cpp -o gen_client.o -I/usr/local/cuda/include
-    RUN $CXX $CXXFLAGS -c codegen/manual_client.cpp -o manual_client.o -I/usr/local/cuda/include
+    RUN $CXX $CXXFLAGS -DVERBOSE=1 -c client.cpp -o client.o -I/usr/local/cuda/include
+    RUN $CXX $CXXFLAGS -DVERBOSE=1 -c codegen/gen_client.cpp -o gen_client.o -I/usr/local/cuda/include
+    RUN $CXX $CXXFLAGS -DVERBOSE=1 -c codegen/manual_client.cpp -o manual_client.o -I/usr/local/cuda/include
     RUN $CXX $linkflags -shared -o libscuda.so client.o gen_client.o manual_client.o -L/usr/local/cuda/lib64 -lcudart -lstdc++
     SAVE ARTIFACT libscuda.so AS LOCAL $ARTIFACT_NAME
 

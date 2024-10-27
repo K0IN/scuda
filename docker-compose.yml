@@ -15,3 +15,21 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
+  
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    environment:
+      - SCUDA_SERVER=server
+    command: "sleep 5; nvidia-smi"
+    depends_on:
+      - server
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]

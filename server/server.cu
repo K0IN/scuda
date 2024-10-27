@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include <pthread.h>
 #include <sys/uio.h>
-#include <atomic>
 
 #include "codegen/gen_server.h"
 
@@ -23,7 +22,6 @@
 
 typedef struct
 {
-  int conid;
   int connfd;
   int read_request_id;
   int write_request_id;
@@ -31,9 +29,6 @@ typedef struct
   struct iovec write_iov[128];
   int write_iov_count = 0;
 } conn_t;
-
-// atomic counter
-std::atomic<int> con_id(0);
 
 int request_handler(const conn_t *conn)
 {
@@ -43,11 +38,6 @@ int request_handler(const conn_t *conn)
   if (read(conn->connfd, &op, sizeof(unsigned int)) < 0)
     return -1;
 
-#ifdef VERBOSE
-  std::cout
-      << "Received operation: " << op << "for connection" << conn->conid << std::endl;
-#endif
-
   auto opHandler = get_handler(op);
 
   if (opHandler == NULL)
@@ -56,20 +46,37 @@ int request_handler(const conn_t *conn)
     return -1;
   }
 
-  return opHandler((void *)conn);
+#ifdef VERBOSE
+  std::cout
+      << "request_handler: " << op << std::endl;
+#endif
+
+  int result = opHandler((void *)conn);
+
+#ifdef VERBOSE
+  std::cout
+      << "request_handler: " << op << " result: " << result << std::endl;
+#endif
+
+  return result;
 }
 
 void client_handler(int connfd)
 {
   std::vector<std::future<void>> futures;
   conn_t conn = {connfd};
-  conn.conid = con_id++;
   if (pthread_mutex_init(&conn.read_mutex, NULL) < 0 ||
       pthread_mutex_init(&conn.write_mutex, NULL) < 0)
   {
     std::cerr << "Error initializing mutex." << std::endl;
     return;
   }
+
+#ifdef VERBOSE
+  std::cout
+      << "new client_handler: " << connfd << std::endl;
+#endif
+
   while (1)
   {
     if (pthread_mutex_lock(&conn.read_mutex) < 0)
@@ -209,8 +216,6 @@ int main()
       std::cerr << "Server accept failed." << std::endl;
       continue;
     }
-
-    std::cout << "New client connected." << std::endl;
 
     std::thread client_thread(client_handler, connfd);
 
